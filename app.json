@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "play-counter",
+    "slug": "play-counter",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
