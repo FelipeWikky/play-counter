@@ -1,0 +1,99 @@
+import React, { useCallback, useEffect, useState } from "react";
+import { Alert } from "react-native";
+import { Container } from "./styles";
+import { useCounter } from "../../hooks/useCounter";
+import { getFixedDay } from "../../utils";
+import { Counter } from "../../models/Counter";
+import { Separator } from "../../components/Separator";
+import { HomeHeader } from "./Header";
+import { DayCalendar } from "../../components/DayCalendar";
+import { HomeActions } from "./Actions";
+
+export const HomeScreen: React.FC = () => {
+    const { executeGreen, executeRed, getCounter, getGreensAndReds } = useCounter();
+    const [daySelected, setDaySelected] = useState("");
+
+    const [loadingCounterSelected, setLoadingCounterSelected] = useState(false);
+    const [counterSelected, setCounterSelected] = useState<Counter | null>(null);
+    const [refetchCounters, setRefetchCounters] = useState<boolean | null>(null);
+
+    const [allGreenRed, setAllGreenRed] = useState<Counter>({ green: 0, red: 0 });
+
+    useEffect(() => {
+        if (refetchCounters === null || refetchCounters === true) {
+            async function loadGreensAndReds() {
+                const counters = await getGreensAndReds();
+                if (counters && counters.length > 0) {
+                    let greens = 0;
+                    let reds = 0;
+                    counters.forEach(counter => {
+                        greens += counter.green;
+                        reds += counter.red;
+                    });
+                    setAllGreenRed({
+                        green: greens, red: reds
+                    });
+                    setRefetchCounters(false);
+                }
+            }
+            loadGreensAndReds();
+        }
+    }, [refetchCounters]);
+
+    const fetchCounterSelected = useCallback(async (day?: string) => {
+        try {
+            setLoadingCounterSelected(true);
+            const date = getFixedDay(day || daySelected, new Date());
+            const counter = await getCounter(date);
+            setCounterSelected(counter);
+        } catch (error) {
+            console.error("Erro em fetchCounterSelected ", error)
+        } finally {
+            setLoadingCounterSelected(false);
+        }
+    }, [daySelected]);
+
+
+    const handleSelectDay = useCallback(async (day: string) => {
+        setDaySelected(prev => prev === day ? "" : day);
+        fetchCounterSelected(day)
+    }, []);
+
+    const handlePressGreenOrRed = useCallback(async (type: "Green" | "Red") => {
+        const date = getFixedDay(daySelected, new Date());
+        const counterExecuted = type === "Green"
+            ? await executeGreen(date)
+            : await executeRed(date);
+
+        if (counterExecuted) {
+            setRefetchCounters(true);
+            Alert.alert(`${type}`, `${type} contabilizado`);
+            fetchCounterSelected();
+        } else {
+            Alert.alert(`${type}`, `Houve um problema ao contabilizar o ${type}`);
+        }
+    }, [daySelected]);
+
+    return (
+        <Container>
+            <HomeHeader
+                greens={allGreenRed.green}
+                reds={allGreenRed.red}
+            />
+
+            <DayCalendar daySelected={daySelected} handleSelectDay={handleSelectDay} />
+
+            <Separator />
+
+            {!!(daySelected) && (
+                <HomeActions
+                    handlePressGreenOrRed={handlePressGreenOrRed}
+                    greenCount={counterSelected?.green || 0}
+                    redCount={counterSelected?.red || 0}
+                />
+            )}
+        </Container>
+    );
+}
+
+
