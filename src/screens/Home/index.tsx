@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Alert } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { Alert, Text } from "react-native";
 import { Container } from "./styles";
 import { useCounter } from "../../hooks/useCounter";
 import { getFixedDay } from "../../utils";
@@ -8,9 +9,12 @@ import { Separator } from "../../components/Separator";
 import { HomeHeader } from "./Header";
 import { DayCalendar } from "../../components/DayCalendar";
 import { HomeActions } from "./Actions";
+import { HomeModalFooter } from "./ModalFooter";
 
 export const HomeScreen: React.FC = () => {
     const { executeGreen, executeRed, getCounter, getGreensAndReds } = useCounter();
+    const modalRef = useRef<BottomSheet>(null);
+
     const [daySelected, setDaySelected] = useState("");
 
     const [loadingCounterSelected, setLoadingCounterSelected] = useState(false);
@@ -62,14 +66,14 @@ export const HomeScreen: React.FC = () => {
     const handlePressGreenOrRed = useCallback(async (type: "Green" | "Red") => {
         const date = getFixedDay(daySelected, new Date());
         const counterExecuted = type === "Green"
-            ? await executeGreen(date)
-            : await executeRed(date);
+            ? await executeGreen(date, Alert)
+            : await executeRed(date, Alert);
 
         if (counterExecuted) {
             setRefetchCounters(true);
             Alert.alert(`${type}`, `${type} contabilizado`);
             fetchCounterSelected();
-        } else {
+        } else if (counterExecuted !== false) {
             Alert.alert(`${type}`, `Houve um problema ao contabilizar o ${type}`);
         }
     }, [daySelected]);
@@ -92,6 +96,11 @@ export const HomeScreen: React.FC = () => {
                     redCount={counterSelected?.red || 0}
                 />
             )}
+
+            <HomeModalFooter
+                modalRef={modalRef}
+            />
+
         </Container>
     );
 }

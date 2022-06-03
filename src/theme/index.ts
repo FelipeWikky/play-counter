@@ -1,6 +1,6 @@
 import { RFPercentage } from 'react-native-responsive-fontsize';
 export const THEME = {
-    TYPE: "light",
+    TYPE: "default",
     COLORS: {
         BACKGROUND: 'rgba(250, 250, 250, 1)', // white
         // BACKGROUND: 'rgba(237, 245, 251, 1)', // white
