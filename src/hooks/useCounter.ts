@@ -1,120 +1,86 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCallback, useContext } from "react";
+import { AlertStatic } from "react-native";
+import CounterContext from "../contexts/counter";
 import { Counter } from "../models/Counter";
+import { CounterStorage } from "../services/storage/counter";
 
-const STORAGE_KEY = "PlayCounter_counter";
+const STORAGE_COUNTER_KEY = "PlayCounter_counter";
 
 export const useCounter = () => {
+    const {
+        betAmount, changeBetAmount,
+        stopGreen, changeStopGreen,
+        stopRed, changeStopRed
+    } = useContext(CounterContext);
 
-    const executeGreen = async (date: string) => {
+    const validateGreenAndRed = useCallback((type: "green" | "red", alert: AlertStatic, stopValue?: number) => {
+        if (stopValue === null) {
+            const message = `Defina seu Stop ${type} antes de contabilizar um ${type}`;
+            alert.alert("Aviso", message);
+            return false; // throw new Error(message);
+        }
+        if (stopValue === 0) {
+            const message = `Seu Stop ${type} está definido como 0`;
+            alert.alert("Aviso", message);
+            return false; // throw new Error(message);
+        }
+    }, []);
+
+    const executeGreen = async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
+        if (!validateGreenAndRed("green", alert, stopGreen)) return false;
         try {
-            const storageCounter = await AsyncStorage.getItem(STORAGE_KEY);
+            let counter = await CounterStorage.get<Counter>(date);
 
-            if (storageCounter) {
-                const parsed: Object = JSON.parse(storageCounter);
-
-                let counter: Counter = parsed[date] as Counter;
-                if (counter) {
-                    counter.green = counter.green + 1;
-                    await AsyncStorage.setItem(
-                        STORAGE_KEY,
-                        JSON.stringify(
-                            {
-                                ...parsed,
-                                [date]: counter
-                            }
-                        )
-                    );
-                    return counter;
-                } else {
-                    counter = {
-                        green: 1,
-                        red: 0
-                    }
-                    await AsyncStorage.setItem(
-                        STORAGE_KEY,
-                        JSON.stringify(
-                            {
-                                ...parsed,
-                                [date]: counter
-                            }
-                        )
-                    );
-                    return counter;
+            if (counter) {
+                if (Number(counter?.green) >= stopGreen) {
+                    alert.alert("Aviso", `Você já alcançou seu Stop green diário (${stopGreen})`);
+                    return false;
                 }
+
+                counter.green = Number(counter.green) + 1;
+                await CounterStorage.set<Counter>(counter, date);
+                return counter;
+            } else {
+                counter = {
+                    green: 1,
+                    red: 0
+                }
+                await CounterStorage.set<Counter>(counter, date);
+                return counter;
             }
-            const counter: Counter = {
-                green: 1,
-                red: 0
-            };
-            await AsyncStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify(
-                    {
-                        [date]: counter
-                    }
-                )
-            );
-            return counter;
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error on execute green: ", error);
-            null;
+            return null;
         }
     }
 
-    const executeRed = async (date: string) => {
+    const executeRed = async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
+        if (!validateGreenAndRed("red", alert, stopGreen)) return false;
+
         try {
-            const storageCounter = await AsyncStorage.getItem(STORAGE_KEY);
+            let counter = await CounterStorage.get<Counter>(date);
 
-            if (storageCounter) {
-                const parsed: Object = JSON.parse(storageCounter);
-
-                let counter: Counter = parsed[date] as Counter;
-                if (counter) {
-                    counter.red = counter.red + 1;
-                    await AsyncStorage.setItem(
-                        STORAGE_KEY,
-                        JSON.stringify(
-                            {
-                                ...parsed,
-                                [date]: counter
-                            }
-                        )
-                    );
-                    return true;
-                } else {
-                    counter = {
-                        green: 0,
-                        red: 1
-                    }
-                    await AsyncStorage.setItem(
-                        STORAGE_KEY,
-                        JSON.stringify(
-                            {
-                                ...parsed,
-                                [date]: counter
-                            }
-                        )
-                    );
-                    return true;
+            if (counter) {
+                if (Number(counter?.red) >= stopRed) {
+                    alert.alert("Aviso", `Você já alcançou seu Stop red diário (${stopGreen})`);
+                    return false;
                 }
 
+                counter.red = Number(counter.red) + 1;
+                await CounterStorage.set<Counter>(counter, date);
+                return counter;
+            } else {
+                counter = {
+                    green: 0,
+                    red: 1
+                }
+                await CounterStorage.set<Counter>(counter, date);
+                return counter;
             }
-            const counter: Counter = {
-                green: 0,
-                red: 1
-            };
-            await AsyncStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify(
-                    {
-                        [date]: counter
-                    }
-                )
-            );
-            return true;
         } catch (error) {
-            console.error("Error on execute red: ", error);
-            false;
+            console.log("Error on execute red: ", error);
+            return null;
         }
     }
 
@@ -124,7 +90,7 @@ export const useCounter = () => {
             red: 0
         };
         try {
-            const storageCounter = await AsyncStorage.getItem(STORAGE_KEY);
+            const storageCounter = await AsyncStorage.getItem(STORAGE_COUNTER_KEY);
             if (storageCounter) {
                 const parsed: Object = JSON.parse(storageCounter);
 
@@ -142,7 +108,7 @@ export const useCounter = () => {
 
     const getGreensAndReds = async (): Promise<Counter[]> => {
         try {
-            const storageCounter = await AsyncStorage.getItem(STORAGE_KEY);
+            const storageCounter = await AsyncStorage.getItem(STORAGE_COUNTER_KEY);
             const counters: Counter[] = [];
 
             if (storageCounter) {
@@ -167,6 +133,7 @@ export const useCounter = () => {
     }
 
     return {
-        executeGreen, executeRed, getCounter, getGreensAndReds
+        executeGreen, executeRed, getCounter, getGreensAndReds,
+        changeBetAmount, changeStopGreen, changeStopRed
     };
 };
