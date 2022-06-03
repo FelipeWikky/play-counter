@@ -8,9 +8,9 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { THEME } from "./src/theme";
 
 import { HomeScreen } from "./src/screens/Home";
+import { CounterProvider } from "./src/contexts/counter";
 
 const AppWrapper = () => {
-
     return (
         <ThemeProvider theme={THEME}>
             <SafeAreaView>
@@ -34,8 +34,10 @@ export default function App() {
     }
 
     return (
-            <SafeAreaProvider>
+        <SafeAreaProvider>
+            <CounterProvider>
                 <AppWrapper />
-            </SafeAreaProvider>
+            </CounterProvider>
+        </SafeAreaProvider>
     );
 }
