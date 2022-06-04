@@ -28,6 +28,7 @@ export const THEME = {
         DANGER_DISABLE: 'rgba(240, 68, 56, 0.5)',
 
         WHITE: 'rgba(237, 245, 251, 1)',
+        BLACK: 'rgba(10, 10, 10, 1)',
         
         OVERLAY: "rgba(255, 255, 255, .6)",
         OVERLAY_LIGHT: "rgba(255, 255, 255, .6)",
@@ -55,7 +56,7 @@ export const THEME = {
         /**
         * Normal small (ns)
         */
-        NORMAL_SMALL: RFPercentage(2),
+        NORMAL_SMALL: RFPercentage(2.0),
         /**
         * Small (sm)
         */
