@@ -13,7 +13,7 @@ abstract class StorageService<T> {
             }
             return null;
         } catch (error) {
-            console.log("Erro em Storage.get:", error);
+            console.error("Erro em Storage.get:", error);
             return null;
         }
     }
@@ -27,7 +27,7 @@ abstract class StorageService<T> {
             return true;
 
         } catch (error) {
-            console.log("Error on Storage.get:", error);
+            console.error("Error on Storage.get:", error);
             return null;
         }
     }
@@ -37,7 +37,7 @@ abstract class StorageService<T> {
             await AsyncStorage.removeItem(this.KEY_STORAGE);
             return true;
         } catch (error) {
-            console.log("Error on Storage.remove: ", error);
+            console.error("Error on Storage.remove: ", error);
             return null;
         }
     }
