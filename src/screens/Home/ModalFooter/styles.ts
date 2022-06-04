@@ -10,7 +10,9 @@ export const Modal = styled(BottomSheet).attrs(props => ({
 }))`
 `;
 
-export const Header = styled.View`
+export const Header = styled.TouchableOpacity.attrs(props => ({
+    activeOpacity: 1
+}))`
     width: 100%;
     align-items: center;
     margin-bottom: 24px;
@@ -22,7 +24,7 @@ export const Title = styled.Text`
 `;
 
 export const Container = styled.View`
-    height: 95%;
+    height: 90%;
 `;
 
 export const StopContainer = styled.View`
@@ -39,7 +41,10 @@ type StopProps = {
     type: "green" | "red"
 }
 
-export const StopInput = styled.TextInput<StopProps>`
+export const StopInput = styled.TextInput.attrs(props => ({
+    keyboardType: "number-pad",
+    defaultValue: "0"
+}))<StopProps>`
     border-bottom-width: 1px;
     border-bottom-color: ${({ theme, type }) => type || theme.COLORS.BORDER};
     height: 32px;
@@ -49,8 +54,34 @@ export const ValuesContainer = styled.View`
     margin: 12px;
 `;
 
-export const ValueInput = styled.TextInput`
+export const ValueInput = styled.TextInput.attrs(props => ({
+    keyboardType: "numeric",
+    defaultValue: "0",
+    autoCapitalize: "none",
+    autoCorrect: false,
+    autoCompleteType: "off"
+}))`
     border-bottom-width: 1px;
     border-bottom-color: ${({ theme }) => theme.COLORS.BORDER};
     height: 32px;
+`;
+
+export const Footer = styled.View`
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin: 0px 12px;
+    margin-bottom: 36px;
+    height: 10%;
+`;
+
+export const FooterButton = styled.TouchableOpacity.attrs(props => ({
+    activeOpacity: 0.5
+}))`
+    background-color: ${({theme}) => theme.COLORS.DEFAULT};
+    border-radius: 20px;
+    width: 40%;
+    height: 36px;
+    justify-content: center;
+    align-items: center;
 `;
