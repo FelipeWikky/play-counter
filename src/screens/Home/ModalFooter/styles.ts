@@ -35,6 +35,9 @@ export const StopContainer = styled.View`
 export const StopContent = styled.View`
     flex-direction: column;
     width: 30%;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
 `;
 
 type StopProps = {

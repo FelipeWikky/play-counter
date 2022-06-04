@@ -5,6 +5,7 @@ import { Label, LabelProps } from "../../../components/Label";
 import { Keyboard, TouchableWithoutFeedback } from "react-native";
 import { useCounter } from "../../../hooks/useCounter";
 import { Button, StyleProps as StyleButtonProps } from "../../../components/Button";
+import { NumericInput } from "../../../components/NumericInput";
 
 interface Configuration {
     green: number;
@@ -20,7 +21,6 @@ interface HomeModalFooterProps {
 
 export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) => {
     const innerRef = modalRef ? modalRef : useRef<BottomSheet>(null);
-
     const [modalOpened, setModalOpened] = useState(false);
 
     const {
@@ -46,10 +46,10 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
         borderRadius: 50
     }) as StyleButtonProps, []);
 
-    const handleChangeInput = useCallback((key: keyof typeof configuration, value: string) => {
+    const handleChangeInput = useCallback((key: keyof typeof configuration, value: string | number) => {
         setConfiguration(prev => ({
             ...prev,
-            [key]: (value && value.trim()) ? Number(value) : ""
+            [key]: (String(value) && String(value).trim()) ? Number(value) : ""
         }))
     }, []);
 
@@ -72,7 +72,7 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
                     <>
                         <Header
                             onPress={() => {
-                                if(modalOpened) {
+                                if (modalOpened) {
                                     innerRef?.current?.collapse();
                                 } else {
                                     innerRef?.current?.expand();
@@ -87,20 +87,25 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
                                 <Label size="NORMAL_SMALL" customColor="green" font="REGULAR">
                                     Stop green
                                 </Label>
-                                <StopInput
-                                    type="green"
-                                    value={configuration.green.toString()}
-                                    onChangeText={text => handleChangeInput("green", text)}
+                                <NumericInput
+                                    value={configuration.green}
+                                    onDecrease={value => handleChangeInput("green", value)}
+                                    onInscrease={value => handleChangeInput("green", value)}
+                                    onChangeValue={value => handleChangeInput("green", value)}
+                                    min={0}
                                 />
                             </StopContent>
                             <StopContent>
                                 <Label size="NORMAL_SMALL" customColor="red" font="REGULAR">
                                     Stop red
                                 </Label>
-                                <StopInput
-                                    type="red"
-                                    value={configuration.red.toString()}
-                                    onChangeText={text => handleChangeInput("red", text)}
+                                <NumericInput
+                                    value={configuration.red}
+                                    onDecrease={value => handleChangeInput("red", value)}
+                                    onInscrease={value => handleChangeInput("red", value)}
+                                    onChangeValue={value => handleChangeInput("red", value)}
+                                    min={0}
+
                                 />
                             </StopContent>
                         </StopContainer>
