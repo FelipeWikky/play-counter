@@ -2,11 +2,11 @@ import React, { createContext, useCallback, useEffect, useState } from "react";
 
 interface CounterContextType {
     stopGreen: number | null;
-    changeStopGreen: (maxGreenPerDay: number) => void;
+    handleChangeStopGreen: (maxGreenPerDay: number) => void;
     stopRed: number | null;
-    changeStopRed: (maxGreenPerDay: number) => void;
+    handleChangeStopRed: (maxGreenPerDay: number) => void;
     betAmount: number;
-    changeBetAmount: (amount: number) => void;
+    handleChangeBetAmount: (amount: number) => void;
 }
 
 interface AuthProviderProps {
@@ -20,15 +20,15 @@ export const CounterProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [stopRed, setStopRed] = useState(0);
     const [betAmount, setBetAmount] = useState(0);
 
-    const changeStopGreen = useCallback((maxGreenPerDay: number) => {
+    const handleChangeStopGreen = useCallback((maxGreenPerDay: number) => {
         setStopGreen(maxGreenPerDay)
     }, []);
 
-    const changeStopRed = useCallback((maxRedPerDay: number) => {
+    const handleChangeStopRed = useCallback((maxRedPerDay: number) => {
         setStopRed(maxRedPerDay)
     }, []);
 
-    const changeBetAmount = useCallback((amount: number) => {
+    const handleChangeBetAmount = useCallback((amount: number) => {
         setBetAmount(amount);
     }, []);
 
@@ -36,8 +36,8 @@ export const CounterProvider: React.FC<AuthProviderProps> = ({ children }) => {
         <CounterContext.Provider
             value={{
                 stopGreen, stopRed,
-                changeStopGreen, changeStopRed,
-                betAmount, changeBetAmount
+                handleChangeStopGreen, handleChangeStopRed,
+                betAmount, handleChangeBetAmount
             }}
         >
             {children}

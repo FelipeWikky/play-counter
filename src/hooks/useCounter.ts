@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { AlertStatic } from "react-native";
 import CounterContext from "../contexts/counter";
 import { Counter } from "../models/Counter";
@@ -9,9 +9,9 @@ const STORAGE_COUNTER_KEY = "PlayCounter_counter";
 
 export const useCounter = () => {
     const {
-        betAmount, changeBetAmount,
-        stopGreen, changeStopGreen,
-        stopRed, changeStopRed
+        betAmount, handleChangeBetAmount,
+        stopGreen, handleChangeStopGreen,
+        stopRed, handleChangeStopRed
     } = useContext(CounterContext);
 
     const validateGreenAndRed = useCallback((type: "green" | "red", alert: AlertStatic, stopValue?: number) => {
@@ -25,13 +25,15 @@ export const useCounter = () => {
             alert.alert("Aviso", message);
             return false; // throw new Error(message);
         }
+        return true;
     }, []);
 
-    const executeGreen = async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
+    useEffect(() => {console.log("green ", stopGreen)}, [stopGreen])
+
+    const executeGreen = useCallback(async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
         if (!validateGreenAndRed("green", alert, stopGreen)) return false;
         try {
             let counter = await CounterStorage.get<Counter>(date);
-
             if (counter) {
                 if (Number(counter?.green) >= stopGreen) {
                     alert.alert("Aviso", `Você já alcançou seu Stop green diário (${stopGreen})`);
@@ -53,7 +55,7 @@ export const useCounter = () => {
             console.error("Error on execute green: ", error);
             return null;
         }
-    }
+    }, [stopGreen]);
 
     const executeRed = async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
         if (!validateGreenAndRed("red", alert, stopGreen)) return false;
@@ -63,7 +65,7 @@ export const useCounter = () => {
 
             if (counter) {
                 if (Number(counter?.red) >= stopRed) {
-                    alert.alert("Aviso", `Você já alcançou seu Stop red diário (${stopGreen})`);
+                    alert.alert("Aviso", `Você já alcançou seu Stop red diário (${stopRed})`);
                     return false;
                 }
 
@@ -79,7 +81,7 @@ export const useCounter = () => {
                 return counter;
             }
         } catch (error) {
-            console.log("Error on execute red: ", error);
+            console.error("Error on execute red: ", error);
             return null;
         }
     }
@@ -134,6 +136,6 @@ export const useCounter = () => {
 
     return {
         executeGreen, executeRed, getCounter, getGreensAndReds,
-        changeBetAmount, changeStopGreen, changeStopRed
+        betAmount, handleChangeBetAmount, stopGreen, handleChangeStopGreen, stopRed, handleChangeStopRed
     };
 };
