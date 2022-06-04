@@ -3,6 +3,7 @@ import { THEME } from "../../theme";
 import { StyledLabel } from "./styles";
 
 export interface LabelProps {
+    label?: string;
     color?: keyof typeof THEME.COLORS;
     customColor?: string;
     size?: keyof typeof THEME.SIZE;
