@@ -12,7 +12,7 @@ import { HomeActions } from "./Actions";
 import { HomeModalFooter } from "./ModalFooter";
 
 export const HomeScreen: React.FC = () => {
-    const { executeGreen, executeRed, getCounter, getGreensAndReds } = useCounter();
+    const { executeGreen, executeRed, getCounter, getGreensAndReds, stopGreen, stopRed } = useCounter();
     const modalRef = useRef<BottomSheet>(null);
 
     const [daySelected, setDaySelected] = useState("");
@@ -76,7 +76,7 @@ export const HomeScreen: React.FC = () => {
         } else if (counterExecuted !== false) {
             Alert.alert(`${type}`, `Houve um problema ao contabilizar o ${type}`);
         }
-    }, [daySelected]);
+    }, [daySelected, stopGreen, stopRed]);
 
     return (
         <Container>
