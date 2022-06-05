@@ -1,11 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useContext } from "react";
 import { AlertStatic } from "react-native";
 import CounterContext from "../contexts/counter";
 import { Configuration } from "../models/Configuration";
 import { Counter } from "../models/Counter";
-import { Storage } from "../services/storage";
 import { CounterStorage } from "../services/storage/counter";
+import { ConfigurationStorage } from "../services/storage/configuration";
 
 const STORAGE_COUNTER_KEY = "PlayCounter_counter";
 
@@ -140,11 +140,9 @@ export const useCounter = () => {
     }
 
     const handleChangeConfiguration = useCallback(async (newConfiguration: Configuration) => {
-        const STORAGE_CONFIGURATION_KEY = "PlayCounter_configurations";
-        const storage = new Storage<Configuration>(STORAGE_CONFIGURATION_KEY);
-        const mergedConfiguration = {...configuration, ...newConfiguration};
+        const mergedConfiguration = { ...configuration, ...newConfiguration };
         setConfiguration(mergedConfiguration);
-        await storage.set<Configuration>(mergedConfiguration);
+        await ConfigurationStorage.set<Configuration>(mergedConfiguration);
     }, [configuration]);
 
     return {

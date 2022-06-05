@@ -44,15 +44,6 @@ type StopProps = {
     type: "green" | "red"
 }
 
-export const StopInput = styled.TextInput.attrs(props => ({
-    keyboardType: "number-pad",
-    defaultValue: "0"
-}))<StopProps>`
-    border-bottom-width: 1px;
-    border-bottom-color: ${({ theme, type }) => type || theme.COLORS.BORDER};
-    height: 32px;
-`;
-
 export const ValuesContainer = styled.View`
     margin: 12px;
 `;
@@ -76,15 +67,4 @@ export const Footer = styled.View`
     margin: 0px 12px;
     margin-bottom: 36px;
     height: 10%;
-`;
-
-export const FooterButton = styled.TouchableOpacity.attrs(props => ({
-    activeOpacity: 0.5
-}))`
-    background-color: ${({theme}) => theme.COLORS.DEFAULT};
-    border-radius: 20px;
-    width: 40%;
-    height: 36px;
-    justify-content: center;
-    align-items: center;
 `;

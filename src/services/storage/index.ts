@@ -20,7 +20,7 @@ abstract class AbstractStorage<T> {
 
     async set<C>(value: T | C, ...otherValues: any): Promise<boolean | null> {
         try {
-            if (!value) throw new Error("Value received on Storage.set is null");
+            if (!value) throw new Error("Value received on Storage.set is empty");
 
             const setted = JSON.stringify(value);
             await AsyncStorage.setItem(this.KEY_STORAGE, setted);

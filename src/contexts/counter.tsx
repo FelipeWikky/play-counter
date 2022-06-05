@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useEffect, useState } from "react";
 import { Configuration } from "../models/Configuration";
+import { ConfigurationStorage } from "../services/storage/configuration";
 
 interface CounterContextType {
     refetchedCount: number;
@@ -28,6 +29,17 @@ export const CounterProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const refetchCount = useCallback(() => {
         setRefetchedCount(prev => prev + 1);
+    }, []);
+
+    const loadConfiguration = useCallback(async() => {
+        const storagedConfiguration = await ConfigurationStorage.get<Configuration>();
+        if(storagedConfiguration) {
+            setConfiguration(storagedConfiguration);
+        } 
+    }, []);
+
+    useEffect(() => {
+        loadConfiguration();
     }, []);
 
     return (

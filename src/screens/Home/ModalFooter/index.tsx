@@ -1,5 +1,5 @@
-import React, { useCallback, useRef, useState } from "react";
-import { Container, Header, Modal, Title, StopInput, StopContainer, StopContent, ValuesContainer, ValueInput, Footer, FooterButton } from "./styles";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Container, Header, Modal, Title, StopContainer, StopContent, ValuesContainer, ValueInput, Footer } from "./styles";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Label, LabelProps } from "../../../components/Label";
 import { Alert, Keyboard, TouchableWithoutFeedback } from "react-native";
@@ -27,6 +27,11 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
     } = useCounter();
 
     const [localConfiguration, setLocalConfiguration] = useState(configuration);
+    useEffect(() => {
+        if(JSON.stringify(configuration) !== JSON.stringify(localConfiguration)) {
+            setLocalConfiguration(configuration);
+        }
+    }, [configuration]);
 
     const getLabelProps = useCallback((label: string) => ({
         label: label,
@@ -127,7 +132,7 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
 
                         <ValuesContainer>
                             <Label font="MEDIUM" size="NORMAL_SMALL" color="DEFAULT" >
-                                Valor da aposta
+                                Valor por aposta
                             </Label>
                             <ValueInput
                                 value={localConfiguration.betAmount.toString()}
