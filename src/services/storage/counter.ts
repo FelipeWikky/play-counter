@@ -1,4 +1,4 @@
-import { StorageService } from ".";
+import { AbstractStorage } from ".";
 import { Counter } from "../../models/Counter";
 
 interface ICounterStorage {
@@ -7,7 +7,7 @@ interface ICounterStorage {
 
 const STORAGE_COUNTER_KEY = "PlayCounter_counter";
 
-class CounterStorageClass extends StorageService<ICounterStorage> {
+class CounterStorageClass extends AbstractStorage<ICounterStorage> {
     constructor() {
         super(STORAGE_COUNTER_KEY)
     }

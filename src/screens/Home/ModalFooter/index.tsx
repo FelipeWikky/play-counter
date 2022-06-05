@@ -22,15 +22,11 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
     const [modalOpened, setModalOpened] = useState(false);
 
     const {
-        betAmount, handleChangeBetAmount,
-        stopGreen, handleChangeStopGreen,
-        stopRed, handleChangeStopRed,
-        clearCounter
+        clearCounter,
+        configuration, handleChangeConfiguration
     } = useCounter();
 
-    const [configuration, setConfiguration] = useState<Configuration>(
-        { green: stopGreen || 0, red: stopRed || 0, amount: betAmount || 0 }
-    );
+    const [localConfiguration, setLocalConfiguration] = useState(configuration);
 
     const getLabelProps = useCallback((label: string) => ({
         label: label,
@@ -45,21 +41,19 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
         borderRadius: 50
     }) as StyleButtonProps, []);
 
-    const handleChangeInput = useCallback((key: keyof typeof configuration, value: string | number) => {
-        setConfiguration(prev => ({
+    const handleChangeInput = useCallback((key: keyof typeof localConfiguration, value: string | number) => {
+        setLocalConfiguration(prev => ({
             ...prev,
             [key]: (String(value) && String(value).trim()) ? Number(value) : ""
         }))
     }, []);
 
     const handlePressSave = useCallback(() => {
-        handleChangeBetAmount(configuration.amount);
-        handleChangeStopGreen(configuration.green);
-        handleChangeStopRed(configuration.red);
+        handleChangeConfiguration(localConfiguration)
         innerRef?.current?.collapse()
-    }, [configuration]);
+    }, [localConfiguration, handleChangeConfiguration]);
 
-    const handleResetCount = useCallback(async() => {
+    const handleResetCount = useCallback(async () => {
         Alert.alert(
             "Confirmação",
             "Deseja realmente resetar a contagem?\Isso deletará todas as contagens deste mês",
@@ -70,9 +64,9 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
                 },
                 {
                     text: "Sim",
-                    onPress: async() => {
+                    onPress: async () => {
                         const reseted = await clearCounter();
-                        if(reseted) {
+                        if (reseted) {
                             Alert.alert("Confirmação", "Contagem resetada")
                         }
                     }
@@ -109,10 +103,10 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
                                     Stop green
                                 </Label>
                                 <NumericInput
-                                    value={configuration.green}
-                                    onDecrease={value => handleChangeInput("green", value)}
-                                    onInscrease={value => handleChangeInput("green", value)}
-                                    onChangeValue={value => handleChangeInput("green", value)}
+                                    value={localConfiguration.stopGreen}
+                                    onDecrease={value => handleChangeInput("stopGreen", value)}
+                                    onInscrease={value => handleChangeInput("stopGreen", value)}
+                                    onChangeValue={value => handleChangeInput("stopGreen", value)}
                                     min={0}
                                 />
                             </StopContent>
@@ -121,10 +115,10 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
                                     Stop red
                                 </Label>
                                 <NumericInput
-                                    value={configuration.red}
-                                    onDecrease={value => handleChangeInput("red", value)}
-                                    onInscrease={value => handleChangeInput("red", value)}
-                                    onChangeValue={value => handleChangeInput("red", value)}
+                                    value={localConfiguration.stopRed}
+                                    onDecrease={value => handleChangeInput("stopRed", value)}
+                                    onInscrease={value => handleChangeInput("stopRed", value)}
+                                    onChangeValue={value => handleChangeInput("stopRed", value)}
                                     min={0}
 
                                 />
@@ -136,8 +130,8 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
                                 Valor da aposta
                             </Label>
                             <ValueInput
-                                value={configuration.amount.toString()}
-                                onChangeText={text => handleChangeInput("amount", text)}
+                                value={localConfiguration.betAmount.toString()}
+                                onChangeText={text => handleChangeInput("betAmount", text)}
                             />
                         </ValuesContainer>
                     </>

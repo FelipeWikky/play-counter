@@ -2,17 +2,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useContext, useEffect } from "react";
 import { AlertStatic } from "react-native";
 import CounterContext from "../contexts/counter";
+import { Configuration } from "../models/Configuration";
 import { Counter } from "../models/Counter";
+import { Storage } from "../services/storage";
 import { CounterStorage } from "../services/storage/counter";
 
 const STORAGE_COUNTER_KEY = "PlayCounter_counter";
 
 export const useCounter = () => {
     const {
-        betAmount, handleChangeBetAmount,
-        stopGreen, handleChangeStopGreen,
-        stopRed, handleChangeStopRed,
-        refetchCount, refetchedCount
+        refetchCount, refetchedCount,
+        configuration, setConfiguration
     } = useContext(CounterContext);
 
     const validateGreenAndRed = useCallback((type: "green" | "red", alert: AlertStatic, stopValue?: number) => {
@@ -30,12 +30,12 @@ export const useCounter = () => {
     }, []);
 
     const executeGreen = useCallback(async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
-        if (!validateGreenAndRed("green", alert, stopGreen)) return false;
+        if (!validateGreenAndRed("green", alert, configuration.stopGreen)) return false;
         try {
             let counter = await CounterStorage.get<Counter>(date);
             if (counter) {
-                if (Number(counter?.green) >= stopGreen) {
-                    alert.alert("Aviso", `Você já alcançou seu Stop green diário (${stopGreen})`);
+                if (Number(counter?.green) >= configuration.stopGreen) {
+                    alert.alert("Aviso", `Você já alcançou seu Stop green diário (${configuration.stopGreen})`);
                     return false;
                 }
 
@@ -54,17 +54,17 @@ export const useCounter = () => {
             console.error("Error on execute green: ", error);
             return null;
         }
-    }, [stopGreen]);
+    }, [configuration]);
 
     const executeRed = useCallback(async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
-        if (!validateGreenAndRed("red", alert, stopGreen)) return false;
+        if (!validateGreenAndRed("red", alert, configuration.stopRed)) return false;
 
         try {
             let counter = await CounterStorage.get<Counter>(date);
 
             if (counter) {
-                if (Number(counter?.red) >= stopRed) {
-                    alert.alert("Aviso", `Você já alcançou seu Stop red diário (${stopRed})`);
+                if (Number(counter?.red) >= configuration.stopRed) {
+                    alert.alert("Aviso", `Você já alcançou seu Stop red diário (${configuration.stopRed})`);
                     return false;
                 }
 
@@ -83,7 +83,7 @@ export const useCounter = () => {
             console.error("Error on execute red: ", error);
             return null;
         }
-    }, [stopRed])
+    }, [configuration])
 
     const getCounter = async (date: string): Promise<Counter> => {
         let defaultCounter: Counter = {
@@ -139,9 +139,17 @@ export const useCounter = () => {
         return cleaned;
     }
 
+    const handleChangeConfiguration = useCallback(async (newConfiguration: Configuration) => {
+        const STORAGE_CONFIGURATION_KEY = "PlayCounter_configurations";
+        const storage = new Storage<Configuration>(STORAGE_CONFIGURATION_KEY);
+        const mergedConfiguration = {...configuration, ...newConfiguration};
+        setConfiguration(mergedConfiguration);
+        await storage.set<Configuration>(mergedConfiguration);
+    }, [configuration]);
+
     return {
-        executeGreen, executeRed, getCounter, getGreensAndReds, clearCounter, 
+        executeGreen, executeRed, getCounter, getGreensAndReds, clearCounter,
         refetchedCount, refetchCount,
-        betAmount, handleChangeBetAmount, stopGreen, handleChangeStopGreen, stopRed, handleChangeStopRed
+        configuration, handleChangeConfiguration
     };
 };

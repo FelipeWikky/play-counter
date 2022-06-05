@@ -1,15 +1,12 @@
 import React, { createContext, useCallback, useEffect, useState } from "react";
+import { Configuration } from "../models/Configuration";
 
 interface CounterContextType {
-    stopGreen: number | null;
-    handleChangeStopGreen: (maxGreenPerDay: number) => void;
-    stopRed: number | null;
-    handleChangeStopRed: (maxGreenPerDay: number) => void;
-    betAmount: number;
-    handleChangeBetAmount: (amount: number) => void;
-
     refetchedCount: number;
     refetchCount: () => void;
+
+    configuration: Configuration;
+    setConfiguration: React.Dispatch<React.SetStateAction<Configuration>>;
 }
 
 interface AuthProviderProps {
@@ -19,22 +16,15 @@ interface AuthProviderProps {
 const CounterContext = createContext<CounterContextType>({} as CounterContextType);
 
 export const CounterProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [stopGreen, setStopGreen] = useState(0);
-    const [stopRed, setStopRed] = useState(0);
-    const [betAmount, setBetAmount] = useState(0); 
     const [refetchedCount, setRefetchedCount] = useState(0);
 
-    const handleChangeStopGreen = useCallback((maxGreenPerDay: number) => {
-        setStopGreen(maxGreenPerDay)
-    }, []);
-
-    const handleChangeStopRed = useCallback((maxRedPerDay: number) => {
-        setStopRed(maxRedPerDay)
-    }, []);
-
-    const handleChangeBetAmount = useCallback((amount: number) => {
-        setBetAmount(amount);
-    }, []);
+    //TODO: separate configuration logic to new context
+    const [configuration, setConfiguration] = useState<Configuration>({
+        betAmount: 0,
+        gainPerBet: 0,
+        stopGreen: 0,
+        stopRed: 0
+    });
 
     const refetchCount = useCallback(() => {
         setRefetchedCount(prev => prev + 1);
@@ -43,10 +33,8 @@ export const CounterProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return (
         <CounterContext.Provider
             value={{
-                stopGreen, stopRed,
-                handleChangeStopGreen, handleChangeStopRed,
-                betAmount, handleChangeBetAmount,
-                refetchCount, refetchedCount
+                refetchCount, refetchedCount,
+                configuration, setConfiguration,
             }}
         >
             {children}
