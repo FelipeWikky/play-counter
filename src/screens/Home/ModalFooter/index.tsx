@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { Container, Header, Modal, Title, StopInput, StopContainer, StopContent, ValuesContainer, ValueInput, Footer, FooterButton } from "./styles";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Label, LabelProps } from "../../../components/Label";
-import { Keyboard, TouchableWithoutFeedback } from "react-native";
+import { Alert, Keyboard, TouchableWithoutFeedback } from "react-native";
 import { useCounter } from "../../../hooks/useCounter";
 import { Button, StyleProps as StyleButtonProps } from "../../../components/Button";
 import { NumericInput } from "../../../components/NumericInput";
@@ -12,8 +12,6 @@ interface Configuration {
     red: number;
     amount: number;
 }
-
-type ModalRef = BottomSheet & any;
 
 interface HomeModalFooterProps {
     modalRef?: React.MutableRefObject<BottomSheet>
@@ -26,7 +24,8 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
     const {
         betAmount, handleChangeBetAmount,
         stopGreen, handleChangeStopGreen,
-        stopRed, handleChangeStopRed
+        stopRed, handleChangeStopRed,
+        clearCounter
     } = useCounter();
 
     const [configuration, setConfiguration] = useState<Configuration>(
@@ -59,6 +58,28 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
         handleChangeStopRed(configuration.red);
         innerRef?.current?.collapse()
     }, [configuration]);
+
+    const handleResetCount = useCallback(async() => {
+        Alert.alert(
+            "Confirmação",
+            "Deseja realmente resetar a contagem?\Isso deletará todas as contagens deste mês",
+            [
+                {
+                    text: "Não",
+                    style: "cancel"
+                },
+                {
+                    text: "Sim",
+                    onPress: async() => {
+                        const reseted = await clearCounter();
+                        if(reseted) {
+                            Alert.alert("Confirmação", "Contagem resetada")
+                        }
+                    }
+                }
+            ]
+        );
+    }, [clearCounter]);
 
     return (
         <Modal
@@ -126,9 +147,10 @@ export const HomeModalFooter: React.FC<HomeModalFooterProps> = ({ modalRef }) =>
             <Footer>
                 <Button
                     color="DEFAULT"
-                    labelProps={getLabelProps("Resetar dados")}
+                    labelProps={getLabelProps("Resetar contagem")}
                     styleProps={getButtonProps()}
                     activeOpacity={0.6}
+                    onPress={handleResetCount}
                 />
                 <Button
                     color="SUCCESS"

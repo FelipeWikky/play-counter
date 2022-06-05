@@ -11,7 +11,8 @@ export const useCounter = () => {
     const {
         betAmount, handleChangeBetAmount,
         stopGreen, handleChangeStopGreen,
-        stopRed, handleChangeStopRed
+        stopRed, handleChangeStopRed,
+        refetchCount, refetchedCount
     } = useContext(CounterContext);
 
     const validateGreenAndRed = useCallback((type: "green" | "red", alert: AlertStatic, stopValue?: number) => {
@@ -27,8 +28,6 @@ export const useCounter = () => {
         }
         return true;
     }, []);
-
-    useEffect(() => {console.log("green ", stopGreen)}, [stopGreen])
 
     const executeGreen = useCallback(async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
         if (!validateGreenAndRed("green", alert, stopGreen)) return false;
@@ -57,7 +56,7 @@ export const useCounter = () => {
         }
     }, [stopGreen]);
 
-    const executeRed = async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
+    const executeRed = useCallback(async (date: string, alert: AlertStatic): Promise<Counter | false | null> => {
         if (!validateGreenAndRed("red", alert, stopGreen)) return false;
 
         try {
@@ -84,7 +83,7 @@ export const useCounter = () => {
             console.error("Error on execute red: ", error);
             return null;
         }
-    }
+    }, [stopRed])
 
     const getCounter = async (date: string): Promise<Counter> => {
         let defaultCounter: Counter = {
@@ -108,7 +107,7 @@ export const useCounter = () => {
         }
     }
 
-    const getGreensAndReds = async (): Promise<Counter[]> => {
+    const getGreensAndReds = useCallback(async (): Promise<Counter[]> => {
         try {
             const storageCounter = await AsyncStorage.getItem(STORAGE_COUNTER_KEY);
             const counters: Counter[] = [];
@@ -132,10 +131,17 @@ export const useCounter = () => {
             console.error("Erro em getGreensAndReds: ", error);
             return [];
         }
+    }, [refetchedCount]);
+
+    const clearCounter = async (): Promise<boolean> => {
+        const cleaned = await CounterStorage.remove();
+        refetchCount();
+        return cleaned;
     }
 
     return {
-        executeGreen, executeRed, getCounter, getGreensAndReds,
+        executeGreen, executeRed, getCounter, getGreensAndReds, clearCounter, 
+        refetchedCount, refetchCount,
         betAmount, handleChangeBetAmount, stopGreen, handleChangeStopGreen, stopRed, handleChangeStopRed
     };
 };

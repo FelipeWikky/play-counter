@@ -12,37 +12,34 @@ import { HomeActions } from "./Actions";
 import { HomeModalFooter } from "./ModalFooter";
 
 export const HomeScreen: React.FC = () => {
-    const { executeGreen, executeRed, getCounter, getGreensAndReds, stopGreen, stopRed } = useCounter();
+    const { executeGreen, executeRed, getCounter, getGreensAndReds, stopGreen, stopRed, refetchCount, refetchedCount } = useCounter();
     const modalRef = useRef<BottomSheet>(null);
 
     const [daySelected, setDaySelected] = useState("");
 
     const [loadingCounterSelected, setLoadingCounterSelected] = useState(false);
     const [counterSelected, setCounterSelected] = useState<Counter | null>(null);
-    const [refetchCounters, setRefetchCounters] = useState<boolean | null>(null);
 
     const [allGreenRed, setAllGreenRed] = useState<Counter>({ green: 0, red: 0 });
 
-    useEffect(() => {
-        if (refetchCounters === null || refetchCounters === true) {
-            async function loadGreensAndReds() {
-                const counters = await getGreensAndReds();
-                if (counters && counters.length > 0) {
-                    let greens = 0;
-                    let reds = 0;
-                    counters.forEach(counter => {
-                        greens += counter.green;
-                        reds += counter.red;
-                    });
-                    setAllGreenRed({
-                        green: greens, red: reds
-                    });
-                    setRefetchCounters(false);
-                }
-            }
-            loadGreensAndReds();
+    const loadGreensAndReds = async () => {
+        const counters = await getGreensAndReds();
+        if (counters) {
+            let greens = 0;
+            let reds = 0;
+            counters?.forEach(counter => {
+                greens += counter.green;
+                reds += counter.red;
+            });
+            setAllGreenRed({
+                green: greens, red: reds
+            });
         }
-    }, [refetchCounters]);
+    }
+
+    useEffect(() => {
+        loadGreensAndReds();
+    }, [refetchedCount]);
 
     const fetchCounterSelected = useCallback(async (day?: string) => {
         try {
@@ -70,7 +67,7 @@ export const HomeScreen: React.FC = () => {
             : await executeRed(date, Alert);
 
         if (counterExecuted) {
-            setRefetchCounters(true);
+            refetchCount();
             Alert.alert(`${type}`, `${type} contabilizado`);
             fetchCounterSelected();
         } else if (counterExecuted !== false) {
