@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-abstract class StorageService<T> {
+abstract class AbstractStorage<T> {
     constructor(private readonly KEY_STORAGE: string) {
 
     }
@@ -43,6 +43,13 @@ abstract class StorageService<T> {
     }
 };
 
+class Storage<T> extends AbstractStorage<T> {
+    constructor(STORAGE_KEY: string) {
+        super(STORAGE_KEY)
+    }
+}
+
 export {
-    StorageService
+    AbstractStorage,
+    Storage
 }
